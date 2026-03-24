@@ -11,8 +11,12 @@ const articles = ref<Article[]>()
 const subtitleText = '我们决定登月，他并非轻而易举，而正因为它困难重重。'
 const typedText = ref('')
 const currentIndex = ref(0)
+const hasTypeStarted = ref(false)
 
 const typeWriter = () => {
+  if (!hasTypeStarted.value) {
+    hasTypeStarted.value = true
+  }
   if (currentIndex.value >= subtitleText.length) return
   typedText.value = subtitleText.substring(0, currentIndex.value + 1)
   currentIndex.value++
@@ -46,7 +50,16 @@ onMounted(async () => {
 
       <div class="title-card">
         <h1 class="maintitle">RO-BLOG</h1>
-        <div class="subtitle">{{ typedText }}<span class="cursor">|</span></div>
+        <div class="subtitle">
+          <template v-if="!hasTypeStarted">
+            <span class="subtitle-loading">
+              <span class="loading-dot"></span>
+            </span>
+          </template>
+          <template v-else>
+            {{ typedText }}<span class="cursor">|</span>
+          </template>
+        </div>
       </div>
 
       <div class="scroll-down" @click="scrollToContent">
@@ -102,11 +115,11 @@ onMounted(async () => {
   background-attachment: fixed;
 }
 .title-card {
-  padding: 3rem 4rem;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
+
+  background: none;
+  border: none ;
+  box-shadow: none ;
+  backdrop-filter: blur(3px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -115,12 +128,19 @@ onMounted(async () => {
   animation: heroTitleCardIn 760ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.title-card:hover {
-  transform: none;
-  box-shadow: none;
-}
 .maintitle {
   font-size: 7rem;
+  border: 2px solid #dbe7f9;
+  border-radius: 30px;
+
+  padding: 0.55rem 1.4rem;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+
+  box-shadow:
+    0 12px 24px -16px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.45),
+    0 0 0 2px rgba(110, 160, 235, 0.28) inset,
+    0 0 24px rgba(180, 215, 255, 0.36);
 }
 
 .subtitle {
@@ -128,14 +148,45 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   padding: 0.55rem 1.4rem;
-  color: rgba(235, 245, 255, 0.98);
+  color: #f5f9ff;
+  border: 2px solid #dbe7f9;
+  border-radius: 18px;
+
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
-  box-shadow: 0 10px 22px -18px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    0 12px 24px -16px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.45),
+    0 0 0 2px rgba(110, 160, 235, 0.28) inset,
+    0 0 24px rgba(180, 215, 255, 0.36);
   animation: subtitleFloatIn 1000ms ease both;
 }
 
 .subtitle .cursor {
   margin-left: 6px;
+}
+
+.subtitle-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.loading-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f3f8ff;
+  box-shadow: 0 0 10px rgba(207, 226, 255, 0.9);
+  animation: subtitleLoadingPulse 1.05s ease-in-out infinite;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dot:nth-child(3) {
+  animation-delay: 0.4s;
 }
 
 .cursor {
@@ -162,14 +213,12 @@ onMounted(async () => {
 
 @keyframes subtitleFloatIn {
   from {
-    opacity: 0;
+    opacity: 0.2;
     transform: translateY(16px);
-    filter: blur(2px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    filter: blur(0);
   }
 }
 
@@ -177,6 +226,19 @@ onMounted(async () => {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes subtitleLoadingPulse {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0) scale(0.65);
+    opacity: 0.38;
+  }
+  40% {
+    transform: translateY(-2px) scale(1.2);
+    opacity: 1;
   }
 }
 

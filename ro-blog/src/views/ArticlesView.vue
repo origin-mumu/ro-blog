@@ -29,10 +29,13 @@ const pageSize = ref(5)
 const totalArticles = ref(0)
 const totalPages = ref(0)
 
-const articles = ref<Article[]>()
-const filteredArticles = ref<Article[]>()
+const articles = ref<Article[]>([])
+const filteredArticles = ref<Article[]>([])
+const isLoading = ref(false)
+const hasArticles = computed(() => filteredArticles.value.length > 0)
 
 const fetchArticles = async (page = currentPage.value, category?: string) => {
+  isLoading.value = true
   try {
     const params: any = {
       page,
@@ -52,6 +55,13 @@ const fetchArticles = async (page = currentPage.value, category?: string) => {
     currentPage.value = res.pagination.current
   } catch (error) {
     console.error('获取文章列表失败:', error)
+    articles.value = []
+    filteredArticles.value = []
+    totalArticles.value = 0
+    totalPages.value = 0
+    currentPage.value = 1
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -160,17 +170,26 @@ const paginationButtons = computed(() => {
           </div>
 
           <div class="article-items">
+            <div v-if="isLoading" class="loading-state">
+              <span class="loading-spinner"></span>
+              <p class="loading-text">正在加载文章...</p>
+            </div>
             <div
-              class="card card-enter"
-              v-for="(article, index) in filteredArticles"
+              v-else-if="hasArticles"
+              class="card"
+              v-for="article in filteredArticles"
               :key="`${activeCategory}-${currentPage}-${article.id}`"
-              :style="{ animationDelay: `${index * 70}ms` }"
             >
               <DummyCard v-bind="article" />
             </div>
+            <div v-else class="empty-state">
+              <p class="empty-title">当前分类暂无文章</p>
+              <p class="empty-desc">试试切换到“全部”或其他分类看看。</p>
+              <button class="empty-action" @click="filterCategory('全部')">查看全部文章</button>
+            </div>
           </div>
 
-          <div class="pagination">
+          <div v-if="!isLoading && hasArticles" class="pagination">
             <button class="page-btn" :class="{ disabled: currentPage === 1 }" @click="prevPage">
               &lt;
             </button>
@@ -262,20 +281,82 @@ const paginationButtons = computed(() => {
   gap: 1rem;
 }
 
+.loading-state {
+  grid-column: 1 / -1;
+  min-height: 220px;
+  border: 1px dashed #bfd1ec;
+  border-radius: 20px;
+  background: rgba(251, 253, 255, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(149, 178, 221, 0.35);
+  border-top-color: #5f7fb2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+  margin-top: 0.7rem;
+  color: #5a6f90;
+  font-size: 0.95rem;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  padding: 2rem 1.5rem;
+  border: 1px dashed #bfd1ec;
+  border-radius: 20px;
+  background: rgba(251, 253, 255, 0.92);
+  color: #4f6281;
+  text-align: center;
+}
+
+.empty-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #364c70;
+}
+
+.empty-desc {
+  margin: 0.55rem 0 1rem;
+  color: #6a7e9d;
+}
+
+.empty-action {
+  border: 1px solid #b8cceb;
+  background: #eef4ff;
+  color: #2f558f;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.empty-action:hover {
+  background: #e2edff;
+  border-color: #95b2dd;
+}
+
 .card {
   min-width: 0;
 }
 
-.card-enter {
-  opacity: 0;
-  transform: translateY(14px);
-  animation: cardFadeUp 500ms ease forwards;
-}
-
-@keyframes cardFadeUp {
+@keyframes spin {
   to {
-    opacity: 1;
-    transform: translateY(0);
+    transform: rotate(360deg);
   }
 }
 
@@ -288,7 +369,7 @@ const paginationButtons = computed(() => {
   color: #2e3b52;
   background: rgba(251, 253, 255, 0.95);
   border: 1px solid #d4e0f2;
-  border-radius: 10px;
+  border-radius: 30px;
   box-shadow: none;
 }
 .filter-item {
@@ -300,7 +381,7 @@ const paginationButtons = computed(() => {
   transition: color 0.3s;
   white-space: nowrap;
   padding: 5px 12px;
-  border-radius: 8px;
+  border-radius: 30px;
   transition: all 0.3s ease;
   background-color: transparent;
   border: 1px solid #d4e0f2;
