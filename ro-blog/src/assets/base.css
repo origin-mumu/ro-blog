@@ -2,6 +2,40 @@
   width: 100%;
   overflow-x: hidden;
 }
+
+:root {
+  --bg-page: #f2f5fb;
+  --bg-surface: #fcfdff;
+  --text-main: #253042;
+  --text-muted: #67758a;
+  --accent: #5f7fb2;
+  --accent-soft: #dde7f5;
+  --border-soft: #dbe4f3;
+  --shadow-soft: 0 12px 24px -18px rgba(33, 49, 74, 0.35);
+}
+.maintitle {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  letter-spacing: 2px;
+  color: #f7fbff;
+  font-family:
+    'PingFang SC',
+    'Microsoft YaHei',
+    'Heiti SC',
+    'Arial',
+    sans-serif;
+  -webkit-text-stroke: 1.2px rgba(16, 33, 64, 0.55);
+  text-shadow:
+    0 0 10px rgba(95, 127, 178, 0.9),
+    0 0 24px rgba(95, 127, 178, 0.65),
+    0 14px 34px rgba(0, 0, 0, 0.35);
+  animation: titleFloatIn 900ms ease both;
+} 
+body {
+  background: var(--bg-page);
+  color: var(--text-main);
+}
 .hero {
   position: relative;
   width: 100%;
@@ -9,34 +43,57 @@
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  background:url('../../public/images/shenshou.png') center/cover fixed;
+  background: url('../assets/shenshou.png') center/cover fixed;
 }
 
 
 .title-card {
   z-index: 10;
+    
+  padding: 1rem 1rem ;
   text-align: center;
   color: white;
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(12px);
+  background: linear-gradient(
+    135deg,
+    rgba(230, 239, 255, 0.2) 0%,
+    rgba(191, 211, 243, 0.16) 100%
+  );
+  backdrop-filter: blur(10px);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  border: 1px solid rgba(206, 220, 244, 0.45);
+  box-shadow:
+    0 14px 30px -16px rgba(16, 33, 64, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
   min-width: 300px;
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  opacity: 0;
+  transform: translateY(18px) scale(0.985);
+  animation: heroTopCardIn 760ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes heroTopCardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title-card {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 .subtitle {
   font-size: 1.25rem;
   font-weight: bold;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(241, 247, 255, 0.95);
+  text-shadow: 0 2px 8px rgba(16, 33, 64, 0.45);
 }
 
 .content-section {
   position: relative;
-  background:#dbeef9;
-  background: linear-gradient(to bottom, #a7d2fa,#DDFFD4);
+  background: linear-gradient(to bottom, #e9effa, #f2f5fb);
   padding: 4rem 2rem;
   z-index: 10;
 
@@ -46,17 +103,17 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 15vh;
-  min-height: 100px;
-  max-height: 150px;
+  height: 9vh;
+  min-height: 56px;
+  max-height: 88px;
   z-index: 5;
 }
 .content-card {
-  background: rgba(255, 255, 255);
+  background: var(--bg-surface);
   border-radius: 12px;
   padding: 1.5em 3rem;
-  box-shadow: 0 20px 25px -5px rgba(11, 120, 245, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-soft);
 }
 
 .waves {

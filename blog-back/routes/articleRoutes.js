@@ -2,14 +2,12 @@ const express = require("express");
 const router = express.Router();
 const articleController = require("../controllers/articleController");
 
-// 文章路由
+// 文章路由（具体路由需放在动态路由 /:id 之前）
 router.get("/", articleController.getAllArticles);
+router.get("/stats/summary", articleController.getBlogStats);
 router.get("/:id", articleController.getArticleById);
 router.post("/", articleController.createArticle);
 router.put("/:id", articleController.updateArticle);
 router.delete("/:id", articleController.deleteArticle);
-
-// 分类和标签路由
-router.get("/stats/summary", articleController.getBlogStats);
 
 module.exports = router;

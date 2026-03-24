@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, nextTick } from 'vue'
-import { getArticleByIdService } from '@/api/article.js'
+import { getArticleByIdService } from '@/api/article'
 import { useRoute } from 'vue-router'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/atom-one-dark.css'
@@ -23,25 +23,20 @@ interface Article {
 
 const route = useRoute()
 const article = ref<Article>()
-const isLoading = ref(true) // 加载状态
-const error = ref<string | null>(null) // 错误信息
+const isLoading = ref(true)
+const error = ref<string | null>(null)
 const highlightCode = () => {
-  //等待dom执行完之后，实现高亮代码
   nextTick(() => {
-    //选择所有pre，code标签代码进行操作。
     document.querySelectorAll('pre code').forEach(block => {
-      //高亮代码块
       hljs.highlightElement(block as HTMLElement)
 
-      //添加行号
       const pre = block.parentElement
       if (!pre || pre.querySelector('.line-numbers-wrapper')) return
 
-      //获取代码文本，并去除，最后的换行符
       const codeText = (block as HTMLElement).innerText.replace(/\n$/, '')
-      //获取行号
+
       const lines = codeText.split('\n').length
-      //创建行号元素
+
       const lineNumbersWrapper = document.createElement('div')
       lineNumbersWrapper.className = 'line-numbers-wrapper'
       let numbering = ''
@@ -49,9 +44,9 @@ const highlightCode = () => {
         numbering += `<span class="line-number">${i}</span>`
       }
       lineNumbersWrapper.innerHTML = numbering
-      //将行号放到代码块前面
+
       pre.insertBefore(lineNumbersWrapper, block)
-      //添加复制按钮
+
       const copyBtn = document.createElement('button')
       copyBtn.className = 'copy-code-btn'
       copyBtn.textContent = '复制'
@@ -65,7 +60,6 @@ const highlightCode = () => {
           }, 2000)
         })
       }
-      //将复制按钮放到pre的最末尾地方
       pre.appendChild(copyBtn)
     })
   })
@@ -87,7 +81,7 @@ onMounted(async () => {
 
     if (res.data) {
       article.value = res.data
-      highlightCode()
+      document.title = `${res.data.title} - RO-BLOG`
     } else {
       error.value = '文章不存在'
     }
@@ -96,6 +90,7 @@ onMounted(async () => {
     error.value = '获取文章失败，请稍后重试'
   } finally {
     isLoading.value = false
+    highlightCode()
   }
 })
 const formatDate = (dateString: string) => {
@@ -106,7 +101,6 @@ const formatDate = (dateString: string) => {
 
 <template>
   <div class="page-container">
-    <!-- 加载状态 -->
     <div v-if="isLoading" class="loading-container">
       <div class="loading-spinner">
         <div class="spinner"></div>
@@ -114,16 +108,14 @@ const formatDate = (dateString: string) => {
       </div>
     </div>
 
-    <!-- 错误状态 -->
     <div v-else-if="error" class="error-container">
       <div class="error-content">
-        <h2>😔 加载失败</h2>
+        <h2> 加载失败</h2>
         <p>{{ error }}</p>
         <button @click="$router.back()" class="back-btn">返回上一页</button>
       </div>
     </div>
 
-    <!-- 正常内容 -->
     <div v-else>
       <section class="hero">
         <div class="hero-bg"></div>
@@ -132,8 +124,8 @@ const formatDate = (dateString: string) => {
           <div class="meta-tag">{{ article?.category || '未分类' }}</div>
           <h1 class="article-title">{{ article?.title || '无标题' }}</h1>
           <div class="article-meta">
-            <span>📅 {{ formatDate(article?.createdAt || '未知日期') }}</span>
-            <span>👀 {{ article?.view_count || 0 }} 阅读</span>
+            <span>{{ formatDate(article?.createdAt || '未知日期') }}</span>
+            <span> {{ article?.view_count || 0 }} 阅读</span>
           </div>
         </div>
 
@@ -142,15 +134,14 @@ const formatDate = (dateString: string) => {
 
       <section class="content-section">
         <div class="layout-wrapper">
+          <SideBar />
           <main class="main-content">
-            <div class="content-card">
+            <div class="content-card detail-card-enter">
               <div class="typography">
                 <div v-html="article?.content || '文章内容为空'"></div>
               </div>
             </div>
           </main>
-
-          <SideBar />
         </div>
       </section>
     </div>
@@ -158,7 +149,6 @@ const formatDate = (dateString: string) => {
 </template>
 
 <style scoped>
-/* 加载状态样式 */
 .loading-container {
   display: flex;
   justify-content: center;
@@ -196,7 +186,6 @@ const formatDate = (dateString: string) => {
   font-size: 1.1rem;
 }
 
-/* 错误状态样式 */
 .error-container {
   display: flex;
   justify-content: center;
@@ -255,11 +244,18 @@ const formatDate = (dateString: string) => {
 }
 
 .title-card {
-  padding: 1rem 3rem;
+  max-width: 760px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(112, 136, 182, 0.36), rgba(77, 98, 143, 0.3));
+  border: 1px solid rgba(197, 214, 240, 0.55);
+  box-shadow:
+    0 14px 32px -20px rgba(12, 26, 54, 0.78),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
 }
 .meta-tag {
   display: inline-block;
-  background: rgba(0, 187, 255, 0.9);
+  background: #E8EFFA;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.9rem;
@@ -267,13 +263,26 @@ const formatDate = (dateString: string) => {
   margin-bottom: 1rem;
   text-transform: uppercase;
   letter-spacing: 1px;
+  color: #4E6790;
 }
 .article-title {
-  font-size: 3rem;
+  font-size: 3.3rem;
   font-weight: 800;
+  letter-spacing: 1px;
   line-height: 1.2;
-  margin-bottom: 1.5rem;
-  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  margin-bottom: 1rem;
+  font-family:
+    'PingFang SC',
+    'Microsoft YaHei',
+    'Heiti SC',
+    'Arial',
+    sans-serif;
+  color: #f7fbff;
+  -webkit-text-stroke: 1.2px rgba(16, 33, 64, 0.55);
+  text-shadow:
+    0 0 10px rgba(95, 127, 178, 0.9),
+    0 0 24px rgba(95, 127, 178, 0.65),
+    0 14px 34px rgba(0, 0, 0, 0.35);
 }
 .article-meta {
   color: rgba(255, 255, 255, 0.8);
@@ -287,10 +296,11 @@ const formatDate = (dateString: string) => {
   min-height: 100vh;
 }
 .layout-wrapper {
-  max-width: 1200px;
+  max-width: 1040px;
   margin: 0 auto;
-  display: flex;
-  gap: 3rem;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 1.5rem;
   align-items: flex-start;
 }
 
@@ -298,6 +308,20 @@ const formatDate = (dateString: string) => {
 .main-content {
   flex: 1;
   min-width: 0;
+}
+
+.detail-card-enter {
+  opacity: 0;
+  transform: translateY(14px);
+  animation: detailCardIn 560ms ease forwards;
+  animation-delay: 80ms;
+}
+
+@keyframes detailCardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .typography {
@@ -397,11 +421,7 @@ const formatDate = (dateString: string) => {
 /* 响应式 */
 @media (max-width: 900px) {
   .layout-wrapper {
-    flex-direction: column;
-  }
-  .sidebar {
-    width: 100%;
-    position: static;
+    grid-template-columns: 1fr;
   }
   .article-title {
     font-size: 2rem;

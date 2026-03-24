@@ -1,4 +1,4 @@
-import request from '@/utils/request.js'
+import request from '@/utils/request'
 
 // 文章分类列表查询
 export function articleCategoryListService() {
@@ -15,7 +15,7 @@ export function getArticleByIdService(id: number) {
   return request.get(`/articles/${id}`)
 }
 
-// 获取博客统计信息
+
 export function getBlogStatsService() {
   return request.get('/articles/stats/summary')
 }

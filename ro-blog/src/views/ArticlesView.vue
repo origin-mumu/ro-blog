@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch } from 'vue'
-import { getAllArticlesService, articleCategoryListService } from '@/api/article.js'
+import { getAllArticlesService, articleCategoryListService } from '@/api/article'
 import { useRoute } from 'vue-router'
 import Wave from '@/components/wave.vue'
 import SideBar from '@/components/sideBar.vue'
@@ -21,7 +21,7 @@ interface Article {
 interface Category {
   id: number
   name: string
-  count: number
+  article_count: number
 }
 
 const currentPage = ref(1)
@@ -31,7 +31,7 @@ const totalPages = ref(0)
 
 const articles = ref<Article[]>()
 const filteredArticles = ref<Article[]>()
-// 分页相关方法
+
 const fetchArticles = async (page = currentPage.value, category?: string) => {
   try {
     const params: any = {
@@ -39,7 +39,6 @@ const fetchArticles = async (page = currentPage.value, category?: string) => {
       limit: pageSize.value,
     }
 
-    // 添加分类筛选参数
     if (category && category !== '全部') {
       params.category = category
     }
@@ -56,40 +55,37 @@ const fetchArticles = async (page = currentPage.value, category?: string) => {
   }
 }
 
-onMounted(() => {
+const activeCategory = ref('全部')
+const categories = ref<Category[]>([])
+
+onMounted(async () => {
   const initialCategory = (route.query.category as string) || '全部'
   activeCategory.value = initialCategory
-  fetchArticles(1, initialCategory === '全部' ? undefined : initialCategory)
-  articleCategoryListService().then(res => {
-    categories.value = res.data
-  })
+  await Promise.all([
+    fetchArticles(1, initialCategory === '全部' ? undefined : initialCategory),
+    articleCategoryListService().then(res => {
+      categories.value = res.data
+    }),
+  ])
 })
 
-// 分类筛选逻辑
-const activeCategory = ref('全部')
-const categories = ref<Category[]>()
-
-const filterCategory = (cat: string) => {
-  console.log('筛选分类', cat)
-  activeCategory.value = cat
-  // 重置到第一页并重新获取数据
-  currentPage.value = 1
-  fetchArticles(1, cat)
-}
-// 监听路由变化，自动筛选分类
 watch(
   () => route.query.category,
   newCategory => {
-    if (newCategory) {
+    if (newCategory && newCategory !== activeCategory.value) {
       activeCategory.value = newCategory as string
-      // 直接重新获取数据，而不是在本地筛选
       currentPage.value = 1
       fetchArticles(1, newCategory as string)
     }
-  },
-  { immediate: true }
+  }
 )
-// 分页控制方法
+
+const filterCategory = (cat: string) => {
+  activeCategory.value = cat
+  currentPage.value = 1
+  fetchArticles(1, cat === '全部' ? undefined : cat)
+}
+
 const goToPage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page
@@ -109,14 +105,12 @@ const nextPage = () => {
   }
 }
 
-// 生成分页按钮数组
 const paginationButtons = computed(() => {
   const buttons = []
   const maxVisibleButtons = 5
   let startPage = Math.max(1, currentPage.value - Math.floor(maxVisibleButtons / 2))
   let endPage = Math.min(totalPages.value, startPage + maxVisibleButtons - 1)
 
-  // 调整起始页，确保显示maxVisibleButtons个按钮
   if (endPage - startPage + 1 < maxVisibleButtons) {
     startPage = Math.max(1, endPage - maxVisibleButtons + 1)
   }
@@ -144,6 +138,7 @@ const paginationButtons = computed(() => {
 
     <section class="content-section">
       <div class="layout-wrapper">
+        <SideBar />
         <main class="post-list">
           <div class="filter-bar">
             <span
@@ -165,7 +160,12 @@ const paginationButtons = computed(() => {
           </div>
 
           <div class="article-items">
-            <div class="card" v-for="article in filteredArticles" :key="article.id">
+            <div
+              class="card card-enter"
+              v-for="(article, index) in filteredArticles"
+              :key="`${activeCategory}-${currentPage}-${article.id}`"
+              :style="{ animationDelay: `${index * 70}ms` }"
+            >
               <DummyCard v-bind="article" />
             </div>
           </div>
@@ -215,8 +215,6 @@ const paginationButtons = computed(() => {
             </div>
           </div>
         </main>
-
-        <SideBar />
       </div>
     </section>
   </div>
@@ -240,30 +238,45 @@ const paginationButtons = computed(() => {
   z-index: -1;
 }
 
-.title-card {
-  padding: 1rem 3rem;
-}
-.maintitle {
-  font-size: 3.5rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  letter-spacing: 2px;
-}
+
 
 .content-section {
   min-height: 80vh;
 }
 .layout-wrapper {
-  max-width: 1200px;
+  max-width: 1040px;
   margin: 0 auto;
-  display: flex;
-  gap: 3rem;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 1.5rem;
   align-items: flex-start;
 }
 .post-list {
   flex: 1;
   min-width: 0;
+}
+
+.article-items {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  min-width: 0;
+}
+
+.card-enter {
+  opacity: 0;
+  transform: translateY(14px);
+  animation: cardFadeUp 500ms ease forwards;
+}
+
+@keyframes cardFadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .filter-bar {
@@ -272,29 +285,32 @@ const paginationButtons = computed(() => {
   padding: 10px 15px;
   margin-bottom: 2rem;
   overflow-x: auto;
-  color: white;
-  background: rgba(255, 255, 255);
-  box-shadow: 0 20px 25px -5px rgba(11, 120, 245, 0.15);
-  border-radius: 12px;
+  color: #2e3b52;
+  background: rgba(251, 253, 255, 0.95);
+  border: 1px solid #d4e0f2;
+  border-radius: 10px;
+  box-shadow: none;
 }
 .filter-item {
   font-size: 1rem;
-  color: #282828;
+  color: #3a4d6c;
   cursor: pointer;
   position: relative;
   font-weight: 500;
   transition: color 0.3s;
   white-space: nowrap;
-  padding: 5px 15px;
-  border-radius: 12px;
+  padding: 5px 12px;
+  border-radius: 8px;
   transition: all 0.3s ease;
-  background-color: #edeffa;
+  background-color: transparent;
+  border: 1px solid #d4e0f2;
 }
 
 .filter-item.active,
 .filter-item:hover {
-  background-color: rgba(34, 58, 175, 0.9);
-  color: #ffffff;
+  background-color: #eef4ff;
+  border-color: #95b2dd;
+  color: #2f558f;
   font-weight: bold;
 }
 
@@ -302,43 +318,49 @@ const paginationButtons = computed(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 4rem;
+  gap: 0.45rem;
+  margin-top: 2.3rem;
   flex-wrap: wrap;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid #d4e0f2;
+  border-radius: 999px;
+  background: rgba(251, 253, 255, 0.92);
 }
 
 .page-btn {
-  width: 40px;
-  height: 40px;
-  border: 1px solid #eee;
-  background: white;
-  border-radius: 8px;
+  min-width: 34px;
+  height: 34px;
+  border: 1px solid #d4e0f2;
+  background: transparent;
+  border-radius: 999px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: all 0.3s;
-  color: #555;
+  transition: all 0.25s;
+  color: #4a5d7a;
   font-family: monospace;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  padding: 0 0.55rem;
 }
 
 .page-btn:hover:not(.disabled) {
-  border-color: #4e6ccd;
-  color: #000000;
-  transform: translateY(-1px);
+  border-color: #95b2dd;
+  color: #2f558f;
+  background: #eef4ff;
 }
 
 .page-btn.active {
-  background: #4e59cd;
+  background: #5f7fb2;
   color: white;
-  border-color: #4e6ccd;
+  border-color: #5f7fb2;
+  box-shadow: 0 8px 16px -12px rgba(33, 49, 74, 0.6);
 }
 
 .page-btn.disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: #f9f9f9;
+  background: transparent;
 }
 
 .page-ellipsis {
@@ -348,9 +370,9 @@ const paginationButtons = computed(() => {
 }
 
 .page-info {
-  margin-left: 1rem;
-  color: #000000;
-  font-size: 0.9rem;
+  margin-left: 0.6rem;
+  color: #51627e;
+  font-size: 0.84rem;
   white-space: nowrap;
 }
 
@@ -374,24 +396,14 @@ const paginationButtons = computed(() => {
 /* 响应式 */
 @media (max-width: 900px) {
   .layout-wrapper {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
-  .sidebar {
-    width: 100%;
-    position: static;
+
+  .article-items {
+    grid-template-columns: 1fr;
   }
   .hero {
     height: 40vh;
-  }
-
-  /* 移动端卡片变为上下结构 */
-  .dummy-card {
-    flex-direction: column;
-    height: auto;
-  }
-  .card-cover {
-    width: 100%;
-    height: 180px;
   }
   .maintitle {
     font-size: 2.5rem;

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import { getBlogStatsService } from '@/api/article.js'
+import { getBlogStatsService } from '@/api/article'
 const data = ref()
 interface Categories {
   id: number
@@ -10,19 +10,23 @@ interface Categories {
 const categories = ref<Categories[]>()
 const totalArticles = ref(0)
 const totalCategories = ref(0)
-onMounted(() => {
-  getBlogStatsService().then(res => {
-    data.value = res.data
-    categories.value = data.value.popularCategories
-    totalArticles.value = data.value.totalArticles
-    totalCategories.value = data.value.totalCategories
-  })
+onMounted(async () => {
+  try {
+    const res = await getBlogStatsService()
+    const stats = res.data
+    data.value = stats
+    categories.value = stats?.popularCategories ?? []
+    totalArticles.value = stats?.totalArticles ?? 0
+    totalCategories.value = stats?.totalCategories ?? 0
+  } catch (err) {
+    console.error('获取侧边栏数据失败:', err)
+  }
 })
 </script>
 <template>
   <aside class="sidebar">
     <div class="widget-card profile-card">
-      <img class="avatar-placeholder" src="../assets/avatar.jpg" alt="头像" />
+      <img class="avatar-placeholder" src="@/assets/avatar.jpg" alt="头像" />
       <h2>robin</h2>
       <br />
       <b
@@ -43,7 +47,7 @@ onMounted(() => {
     </div>
 
     <div class="widget-card">
-      <h4 class="widget-title">🏷️ 分类</h4>
+      <h4 class="widget-title">分类</h4>
       <div class="tags-cloud">
         <span class="tag" v-for="category in categories" :key="category.name">{{
           category.name
@@ -54,28 +58,46 @@ onMounted(() => {
 </template>
 <style scoped>
 .sidebar {
-  width: 300px;
+  width: 240px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.25rem;
   position: sticky;
-  top: 2rem;
+  top: 5.5rem;
 }
 
 .widget-card {
-  background: rgba(255, 255, 255);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: #f8fbff;
+  border: 1px solid #d6e2f2;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 20px 25px -5px rgba(11, 120, 245, 0.15);
+  box-shadow: 0 14px 26px -18px rgba(33, 49, 74, 0.4);
+  opacity: 0;
+  transform: translateY(12px);
+  animation: sidebarCardIn 520ms ease forwards;
+}
+
+.widget-card:nth-child(1) {
+  animation-delay: 60ms;
+}
+
+.widget-card:nth-child(2) {
+  animation-delay: 140ms;
+}
+
+@keyframes sidebarCardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .widget-title {
   font-size: 1.1rem;
   margin-bottom: 1rem;
-  color: #333;
-  border-bottom: 1px solid #eee;
+  color: #28344a;
+  border-bottom: 1px solid #dbe4f3;
   padding-bottom: 0.5rem;
 }
 
@@ -92,17 +114,17 @@ onMounted(() => {
   display: block;
   width: 35px;
   height: 35px;
-  background: rgba(78, 101, 205, 0.1);
+  background: #e8effa;
   border-radius: 50%;
   line-height: 35px;
-  color: #555;
+  color: #66758a;
   cursor: pointer;
   transition: all 0.3s;
   font-weight: bold;
   font-size: 0.8rem;
 }
 .social-icons-row span:hover {
-  background: #4e59cd;
+  background: #5f7fb2;
   color: white;
   transform: translateY(-3px);
 }
@@ -117,13 +139,13 @@ onMounted(() => {
   display: flex;
   justify-content: space-around;
   margin-top: 1rem;
-  color: #666;
+  color: #67758a;
   font-size: 0.9rem;
 }
 .stats span {
   display: block;
   font-weight: bold;
-  color: #333;
+  color: #28344a;
   font-size: 1.1rem;
 }
 
@@ -133,8 +155,8 @@ onMounted(() => {
   gap: 0.8rem;
 }
 .tag {
-  background: rgba(78, 101, 205, 0.1);
-  color: #666;
+  background: #e8effa;
+  color: #66758a;
   padding: 0.3rem 0.8rem;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -142,7 +164,7 @@ onMounted(() => {
   transition: all 0.2s;
 }
 .tag:hover {
-  background: #4e54cd;
+  background: #5f7fb2;
   color: white;
 }
 </style>

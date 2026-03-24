@@ -1,21 +1,135 @@
 <script setup lang="ts">
 import Nav from '@/components/nav.vue'
 import { getBlogStatsService } from '@/api/article'
-import { onMounted } from 'vue'
-import { ref } from 'vue'
+import { onMounted, ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+
 interface BlogStats {
   totalArticles: number
   totalCategories: number
+  totalViews: number
+  popularArticles: any[]
+  popularCategories: any[]
 }
-const router = useRouter()
 
+const router = useRouter()
 const blogStats = ref<BlogStats>()
+const chartRef = ref<HTMLElement>()
+let chartInstance: any = null
+
+// 初始化图表
+const initChart = () => {
+  if (!chartRef.value || !blogStats.value?.popularCategories) return
+
+  import('echarts').then((echarts) => {
+    chartInstance = echarts.init(chartRef.value!)
+
+    // 准备图表数据
+    if (!blogStats.value?.popularCategories.length) return
+    const chartData = blogStats.value.popularCategories.map((category: any, index: number) => ({
+      name: category.name,
+      value: category.article_count || 0,
+      itemStyle: {
+        color: getCategoryColor(index),
+      },
+    }))
+
+    const option = {
+      title: {
+        text: '文章分类分布',
+        left: 'center',
+        textStyle: {
+          color: '#2c3e50',
+          fontSize: 16,
+          fontWeight: 'bold',
+        },
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c}篇 ({d}%)',
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+        top: 'middle',
+        textStyle: {
+          color: '#666',
+        },
+      },
+      series: [
+        {
+          name: '文章数量',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          center: ['60%', '50%'],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderRadius: 10,
+            borderColor: '#fff',
+            borderWidth: 2,
+          },
+          label: {
+            show: false,
+            position: 'center',
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 18,
+              fontWeight: 'bold',
+            },
+          },
+          labelLine: {
+            show: false,
+          },
+          data: chartData,
+        },
+      ],
+    }
+
+    chartInstance.setOption(option)
+
+    // 响应式调整
+    const resizeChart = () => {
+      chartInstance?.resize()
+    }
+    window.addEventListener('resize', resizeChart)
+  })
+}
+
+// 获取分类颜色
+const getCategoryColor = (index: number) => {
+  const colors = [
+    '#5470c6',
+    '#91cc75',
+    '#fac858',
+    '#ee6666',
+    '#73c0de',
+    '#3ba272',
+    '#fc8452',
+    '#9a60b4',
+    '#ea7ccc',
+  ]
+  return colors[index % colors.length]
+}
+
 onMounted(() => {
   getBlogStatsService().then((res) => {
-    console.log(res)
+    console.log('后台统计数据:', res)
     blogStats.value = res.data
+
+    // 数据加载完成后初始化图表
+    if (blogStats.value?.popularCategories && blogStats.value.popularCategories.length > 0) {
+      setTimeout(initChart, 100)
+    }
   })
+})
+
+onUnmounted(() => {
+  if (chartInstance) {
+    chartInstance.dispose()
+    chartInstance = null
+  }
 })
 const handleCreateArticle = () => {
   router.push({ name: 'articles' })
@@ -34,6 +148,7 @@ const handleManageCategories = () => {
       <div class="content-box">
         <div class="title">博客首页</div>
         <div class="dashboard-content">
+          <!-- 统计卡片 -->
           <div class="stats-cards">
             <div class="stat-card">
               <div class="stat-icon">📊</div>
@@ -49,6 +164,25 @@ const handleManageCategories = () => {
                 <div class="stat-number">{{ blogStats?.totalCategories || 0 }}</div>
                 <div class="stat-label">分类数量</div>
               </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">👀</div>
+              <div class="stat-info">
+                <div class="stat-number">{{ blogStats?.totalViews || 0 }}</div>
+                <div class="stat-label">总阅读量</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 图表区域 -->
+          <div
+            class="chart-section"
+            v-if="blogStats?.popularCategories && blogStats.popularCategories.length > 0"
+          >
+            <div class="chart-card">
+              <h3 class="chart-title">📈 文章分类分布</h3>
+              <div ref="chartRef" class="chart-container"></div>
             </div>
           </div>
 
@@ -171,6 +305,45 @@ const handleManageCategories = () => {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+/* 图表区域样式 */
+.chart-section {
+  margin: 20px 0;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.chart-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.chart-container {
+  width: 100%;
+  height: 400px;
+  min-height: 400px;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .chart-card {
+    padding: 20px;
+  }
+
+  .chart-container {
+    height: 300px;
+    min-height: 300px;
+  }
 }
 
 .action-btn {

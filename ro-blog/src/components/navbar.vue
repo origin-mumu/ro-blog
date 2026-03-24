@@ -59,13 +59,13 @@ const handleMouseMove = (e: MouseEvent) => {
 </template>
 <style scoped>
 .navbar {
-  z-index: 1000;
+  z-index: 100;
   position: fixed;
   top: 10px;
   left: 50%;
   width: auto;
   transform: translateX(-50%);
-  --spotlight-color: rgb(107, 225, 255);
+  --spotlight-color: rgba(156, 184, 225, 0.35);
 }
 .nav-container {
   display: flex;
@@ -81,13 +81,13 @@ const handleMouseMove = (e: MouseEvent) => {
   justify-content: center;
   font-size: large;
   font-weight: bold;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 24px -18px rgba(33, 49, 74, 0.42);
   padding: 5px 15px;
   border-radius: 60px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 252, 248, 0.75);
   backdrop-filter: blur(10px);
   height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(219, 228, 243, 0.95);
   transition: all 0.3s ease;
   cursor: pointer;
   overflow: hidden;
@@ -132,15 +132,15 @@ const handleMouseMove = (e: MouseEvent) => {
   align-items: center;
   justify-content: center;
   list-style: none;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 24px -18px rgba(33, 49, 74, 0.42);
   padding: 5px 15px;
   border-radius: 60px;
   margin: 0 20px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 252, 248, 0.75);
   backdrop-filter: blur(10px);
   height: 40px;
   font-weight: bold;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(219, 228, 243, 0.95);
   overflow: hidden;
 }
 .nav-item {
@@ -151,7 +151,7 @@ const handleMouseMove = (e: MouseEvent) => {
   border-radius: 60px;
   padding: 5px 15px;
   white-space: nowrap;
-  color: #3c3c3c;
+  color: #2e3b52;
   transition: all 0.3s ease;
   display: inline-flex;
   font-size: 1.1rem;
@@ -163,21 +163,24 @@ const handleMouseMove = (e: MouseEvent) => {
 }
 .nav-active {
   transition: all 0.3s ease;
-  background: linear-gradient(to bottom, #1e90ff 0%, #00bfff 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, rgba(235, 243, 255, 0.95) 0%, rgba(214, 228, 248, 0.92) 100%);
+  border: 1px solid rgba(147, 174, 214, 0.7);
+  color: #35507c;
   transform: scale(1.1);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 10px 18px -14px rgba(33, 49, 74, 0.55);
 }
 
 .more {
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(219, 228, 243, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 24px -18px rgba(33, 49, 74, 0.42);
   padding: 5px 15px;
   border-radius: 60px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 252, 248, 0.75);
   backdrop-filter: blur(10px);
   height: 40px;
   transition: all 0.3s ease;
