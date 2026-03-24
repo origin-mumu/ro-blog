@@ -46,7 +46,6 @@ const handleMouseMove = (e: MouseEvent) => {
             class="nav-link"
             :class="{ 'nav-active': isActive(item.path) }"
           >
-            <span class="nav-icon">{{ item.icon }}</span>
             <span class="nav-text">{{ item.name }}</span>
           </RouterLink>
         </li>
@@ -82,10 +81,10 @@ const handleMouseMove = (e: MouseEvent) => {
   font-size: large;
   font-weight: bold;
   box-shadow: 0 10px 24px -18px rgba(33, 49, 74, 0.42);
-  padding: 5px 15px;
+  padding: 0px 15px;
   border-radius: 60px;
-  background: rgba(255, 252, 248, 0.75);
-  backdrop-filter: blur(10px);
+  background: rgba(217, 217, 217, 0.55);
+  backdrop-filter: blur(5px);
   height: 40px;
   border: 1px solid rgba(219, 228, 243, 0.95);
   transition: all 0.3s ease;
@@ -133,11 +132,11 @@ const handleMouseMove = (e: MouseEvent) => {
   justify-content: center;
   list-style: none;
   box-shadow: 0 10px 24px -18px rgba(33, 49, 74, 0.42);
-  padding: 5px 15px;
+  padding: 0px 15px;
   border-radius: 60px;
   margin: 0 20px;
-  background: rgba(255, 252, 248, 0.75);
-  backdrop-filter: blur(10px);
+  background: rgba(217, 217, 217, 0.55);
+  backdrop-filter: blur(5px);
   height: 40px;
   font-weight: bold;
   border: 1px solid rgba(219, 228, 243, 0.95);
@@ -147,9 +146,12 @@ const handleMouseMove = (e: MouseEvent) => {
   margin: 0 10px;
 }
 .nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
   border-radius: 60px;
-  padding: 5px 15px;
+  padding: 3px 15px;
   white-space: nowrap;
   color: #2e3b52;
   transition: all 0.3s ease;
@@ -178,10 +180,10 @@ const handleMouseMove = (e: MouseEvent) => {
   align-items: center;
   justify-content: center;
   box-shadow: 0 10px 24px -18px rgba(33, 49, 74, 0.42);
-  padding: 5px 15px;
+  padding: 0px 15px;
   border-radius: 60px;
-  background: rgba(255, 252, 248, 0.75);
-  backdrop-filter: blur(10px);
+  background: rgba(217, 217, 217, 0.55);
+  backdrop-filter: blur(5px);
   height: 40px;
   transition: all 0.3s ease;
   font-weight: bold;
