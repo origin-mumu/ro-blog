@@ -24,12 +24,14 @@ const heroSlides = ref<HeroSlide[]>([
   { id: 3, title: 'YUE LING', image: yuelingImg },
 ])
 const thumbnailSlides = ref<HeroSlide[]>([])
+const isThumbIntroActive = ref(false)
 const carouselState = ref<'next' | 'prev' | ''>('')
 const isAnimating = ref(false)
 const transitionDuration = 1200
 
 let animationTimer: ReturnType<typeof setTimeout> | null = null
 let autoplayTimer: ReturnType<typeof setInterval> | null = null
+let thumbIntroTimer: ReturnType<typeof setTimeout> | null = null
 
 const rotateLeft = <T,>(arr: T[]) => [...arr.slice(1), arr[0]]
 const rotateRight = <T,>(arr: T[]) => [arr[arr.length - 1], ...arr.slice(0, arr.length - 1)]
@@ -89,12 +91,20 @@ onMounted(async () => {
     articles.value = []
   }
   thumbnailSlides.value = rotateLeft(heroSlides.value)
+  requestAnimationFrame(() => {
+    isThumbIntroActive.value = true
+    if (thumbIntroTimer) clearTimeout(thumbIntroTimer)
+    thumbIntroTimer = setTimeout(() => {
+      isThumbIntroActive.value = false
+    }, 1600)
+  })
   startAutoplay()
 })
 
 onBeforeUnmount(() => {
   stopAutoplay()
   if (animationTimer) clearTimeout(animationTimer)
+  if (thumbIntroTimer) clearTimeout(thumbIntroTimer)
 })
 </script>
 
@@ -119,8 +129,13 @@ onBeforeUnmount(() => {
           <p class="hero-subtitle">我们决定登月，他并非轻而易举，而正因为它困难重重。</p>
         </div>
 
-        <div class="thumbnail">
-          <div v-for="item in thumbnailSlides" :key="`thumb-${item.id}`" class="item">
+        <div class="thumbnail" :class="{ 'thumb-intro': isThumbIntroActive }">
+          <div
+            v-for="(item, index) in thumbnailSlides"
+            :key="`thumb-${item.id}`"
+            class="item"
+            :style="{ '--thumb-delay': `${index * 140}ms` }"
+          >
             <img :src="item.image" :alt="item.title" loading="eager" decoding="auto" />
             <div class="thumb-title">{{ item.title }}</div>
           </div>
@@ -289,6 +304,19 @@ onBeforeUnmount(() => {
   border-radius: 15px;
   overflow: hidden;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.thumbnail.thumb-intro .item {
+  opacity: 0;
+  transform: translateY(34px) scale(0.9);
+  animation: thumbEnter 0.88s var(--thumb-delay, 0ms) cubic-bezier(0.2, 1, 0.22, 1) forwards;
+}
+
+@keyframes thumbEnter {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .thumbnail .item img {

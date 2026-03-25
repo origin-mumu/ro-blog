@@ -193,21 +193,54 @@ watch(
 }
 
 .site-footer {
+  position: relative;
   margin-top: auto;
   text-align: center;
-  padding: 0.95rem 1rem 1.1rem;
+  padding: 1.05rem 1rem 1.2rem;
   font-size: 0.86rem;
   color: #6b7a90;
+  overflow: hidden;
+  background-color: #A8CFFF;
+}
+
+.site-footer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.95) 0.8px, transparent 1.2px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.72) 1px, transparent 1.4px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.86) 0.9px, transparent 1.3px);
+  background-size: 145px 80px, 180px 95px, 210px 105px;
+  background-position: 0 0, 40px 28px, 90px 18px;
+  opacity: 0.45;
 }
 
 .site-footer a {
-  color: #6b7a90;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0.28rem 0.9rem;
+  color: #5e7090;
   text-decoration: none;
-  transition: color 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.43);
+  box-shadow:
+    0 8px 20px -14px rgba(33, 49, 74, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(4px);
+  transition: all 0.22s ease;
 }
 
 .site-footer a:hover {
   color: #2f558f;
+  border-color: rgba(171, 197, 235, 0.85);
+  background: rgba(255, 255, 255, 0.62);
+  transform: translateY(-1px);
 }
 
 :global(#waifu) {

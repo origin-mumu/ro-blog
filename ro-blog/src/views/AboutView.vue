@@ -128,8 +128,8 @@ const openExternalLink = (url: string) => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(3px);
+  /* background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px); */
   z-index: -1;
 }
 

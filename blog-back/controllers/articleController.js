@@ -192,7 +192,7 @@ const getBlogStats = async (req, res) => {
     const popularArticles = await Article.findAll({
       where: { status: "published" },
       order: [["createdAt", "DESC"]],
-      limit: 3,
+      limit: 4,
       attributes: [
         "id",
         "title",
