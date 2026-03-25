@@ -8,6 +8,8 @@ const isAppReady = ref(false)
 const LIVE2D_ROOT = '/live2d'
 const route = useRoute()
 const APP_LOADING_MIN_MS = 120
+const ICP_RECORD_NUMBER = '蜀ICP备2026809410号-1'
+const MIIT_URL = 'https://beian.miit.gov.cn/'
 
 declare global {
   interface Window {
@@ -126,12 +128,19 @@ watch(
     </div>
     <navbar />
     <RouterView> </RouterView>
+    <footer class="site-footer">
+      <a :href="MIIT_URL" target="_blank" rel="noopener noreferrer">
+        {{ ICP_RECORD_NUMBER }}
+      </a>
+    </footer>
   </div>
 </template>
 
 <style scoped>
 .app-container {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -181,6 +190,24 @@ watch(
 .loading-spinner p {
   margin: 0;
   font-size: 0.95rem;
+}
+
+.site-footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 0.95rem 1rem 1.1rem;
+  font-size: 0.86rem;
+  color: #6b7a90;
+}
+
+.site-footer a {
+  color: #6b7a90;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-footer a:hover {
+  color: #2f558f;
 }
 
 :global(#waifu) {

@@ -74,6 +74,12 @@ const handleMouseMove = (e: MouseEvent) => {
   padding: 0 10px;
   width: 100%;
 }
+.nav-brand,
+.nav-menu, 
+.more {
+  background: rgba(232, 251, 255, 0.4);
+}
+
 .nav-brand {
   display: flex;
   align-items: center;
@@ -83,7 +89,7 @@ const handleMouseMove = (e: MouseEvent) => {
   box-shadow: 0 10px 24px -18px rgba(33, 49, 74, 0.42);
   padding: 0px 15px;
   border-radius: 60px;
-  background: rgba(217, 217, 217, 0.55);
+  
   backdrop-filter: blur(5px);
   height: 40px;
   border: 1px solid rgba(219, 228, 243, 0.95);
@@ -126,6 +132,8 @@ const handleMouseMove = (e: MouseEvent) => {
 .more:hover::before {
   opacity: 1;
 }
+
+
 .nav-menu {
   display: flex;
   align-items: center;
@@ -135,7 +143,7 @@ const handleMouseMove = (e: MouseEvent) => {
   padding: 0px 15px;
   border-radius: 60px;
   margin: 0 20px;
-  background: rgba(217, 217, 217, 0.55);
+ 
   backdrop-filter: blur(5px);
   height: 40px;
   font-weight: bold;
@@ -182,7 +190,7 @@ const handleMouseMove = (e: MouseEvent) => {
   box-shadow: 0 10px 24px -18px rgba(33, 49, 74, 0.42);
   padding: 0px 15px;
   border-radius: 60px;
-  background: rgba(217, 217, 217, 0.55);
+
   backdrop-filter: blur(5px);
   height: 40px;
   transition: all 0.3s ease;

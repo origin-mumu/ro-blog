@@ -169,8 +169,8 @@ onBeforeUnmount(() => {
 .carousel {
   position: relative;
   width: 100vw;
-  height: 100%;
-  margin-top: -70px;
+  height: 100vh;
+  margin-top:0px;
   overflow: hidden;
 }
 
@@ -184,7 +184,7 @@ onBeforeUnmount(() => {
   left: 0;
   bottom: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   object-fit: cover;
   transform: translateZ(0);
   will-change: width, height, bottom, left, border-radius;

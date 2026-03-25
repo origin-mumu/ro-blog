@@ -93,7 +93,8 @@ body {
 
 .content-section {
   position: relative;
-  background: linear-gradient(to bottom, #e9effa, #f2f5fb);
+  background: linear-gradient(to bottom, #f2f5fb,#a7ceff);
+  /* background: #afbefd; */
   padding: 4rem 2rem;
   z-index: 10;
 
