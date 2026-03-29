@@ -142,8 +142,8 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="arrows">
-          <button type="button" aria-label="上一张" @click="showSlider('prev')">◁</button>
-          <button type="button" aria-label="下一张" @click="showSlider('next')">▷</button>
+          <button type="button" aria-label="上一张" @click="showSlider('prev')"><</button>
+          <button type="button" aria-label="下一张" @click="showSlider('next')">></button>
         </div>
         <div class="time"></div>
       </div>

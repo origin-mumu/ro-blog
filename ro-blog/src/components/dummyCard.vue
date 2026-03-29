@@ -88,8 +88,11 @@ const formatDate = (dateString: string) => {
   transition: color 0.2s ease;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  max-height: calc(1.35em * 2);
+  word-break: break-word;
 }
 
 .article-card:hover .a-title {
@@ -101,11 +104,16 @@ const formatDate = (dateString: string) => {
   font-size: 0.92rem;
   line-height: 1.55;
   margin-bottom: 1rem;
-  flex-grow: 1;
+  flex: 0 0 auto;
+  min-height: 0;
+  max-height: calc(1.55em * 2);
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
 }
 
 .a-footer {

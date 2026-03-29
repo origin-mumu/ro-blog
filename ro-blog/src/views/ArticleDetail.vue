@@ -278,11 +278,8 @@ const formatDate = (dateString: string) => {
     'Arial',
     sans-serif;
   color: #f7fbff;
-  -webkit-text-stroke: 1.2px rgba(16, 33, 64, 0.55);
-  text-shadow:
-    0 0 10px rgba(95, 127, 178, 0.9),
-    0 0 24px rgba(95, 127, 178, 0.65),
-    0 14px 34px rgba(0, 0, 0, 0.35);
+
+ 
 }
 .article-meta {
   color: rgba(255, 255, 255, 0.8);
