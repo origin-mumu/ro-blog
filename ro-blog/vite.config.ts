@@ -10,7 +10,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const apiTarget = env.VITE_API_PROXY_TARGET || 'http://47.94.128.65:5000'
-
+  // const apiTarget = 'http://localhost:5000'
   return {
     plugins: [
       vue(),
@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: apiTarget,
           changeOrigin: true,
+          ws: true,
         },
       },
     },

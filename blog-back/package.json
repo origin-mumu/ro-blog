@@ -2,10 +2,10 @@
   "name": "blog-back",
   "version": "1.0.0",
   "main": "app.js",
- "scripts": {
-  "start": "node src/app.js",
-  "dev": "nodemon src/app.js"
-},
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -15,7 +15,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "mysql2": "^3.16.1",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"

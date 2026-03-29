@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import { RouterView, useRoute } from 'vue-router'
+import { RouterView, useRoute, useRouter } from 'vue-router'
 
 import navbar from './components/navbar.vue'
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 
 const isAppReady = ref(false)
+const router = useRouter()
 const LIVE2D_ROOT = '/live2d'
 const route = useRoute()
 const APP_LOADING_MIN_MS = 120
-const ICP_RECORD_NUMBER = '蜀ICP备2026809410号-1'
+const ICP_RECORD_NUMBER = '豫ICP备2026009410号'
 const MIIT_URL = 'https://beian.miit.gov.cn/'
+/** 公安备案号（与工信部备案可同时展示） */
+const PSB_RECORD_NUMBER = '苏公网安备32021402004612号'
+const PSB_QUERY_URL =
+  'http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=32021402004612'
 
 declare global {
   interface Window {
@@ -104,10 +109,41 @@ const updateLive2dVisibility = (_path: string) => {
   if (waifuToggle) waifuToggle.style.display = shouldHide ? 'none' : ''
 }
 
+let waifuNavBound = false
+const tryBindWaifuNavigate = () => {
+  if (waifuNavBound) return
+  const el = document.getElementById('waifu')
+  if (!el) return
+  waifuNavBound = true
+  el.style.cursor = 'pointer'
+  el.title = '点击进入 AI 助手'
+  el.addEventListener('click', () => {
+    if (route.path === '/echobot') return
+    router.push({ name: 'echobot' })
+  })
+}
+
+let waifuPollTimer: number | null = null
+
 onMounted(() => {
   makeAppReadySoon()
-  initLive2dWidget()
+  initLive2dWidget().then(() => {
+    tryBindWaifuNavigate()
+    let n = 0
+    waifuPollTimer = window.setInterval(() => {
+      tryBindWaifuNavigate()
+      n++
+      if (waifuNavBound || n > 40) {
+        if (waifuPollTimer) clearInterval(waifuPollTimer)
+        waifuPollTimer = null
+      }
+    }, 400)
+  })
   updateLive2dVisibility(route.path)
+})
+
+onBeforeUnmount(() => {
+  if (waifuPollTimer) clearInterval(waifuPollTimer)
 })
 
 watch(
@@ -119,19 +155,30 @@ watch(
 </script>
 
 <template>
-  <div class="app-container">
+  <div class="app-container" :class="{ 'app-container--echobot': route.path === '/echobot' }">
     <div v-if="!isAppReady" class="loading-container">
       <div class="loading-spinner">
         <div class="spinner"></div>
         <p>加载中</p>
       </div>
     </div>
-    <navbar />
-    <RouterView> </RouterView>
-    <footer class="site-footer">
-      <a :href="MIIT_URL" target="_blank" rel="noopener noreferrer">
-        {{ ICP_RECORD_NUMBER }}
-      </a>
+    <navbar v-show="route.path !== '/echobot'" />
+    <div
+      class="router-outlet"
+      :class="{ 'router-outlet--echobot': route.path === '/echobot' }"
+    >
+      <RouterView />
+    </div>
+    <footer class="site-footer" :class="{ 'site-footer--echobot': route.path === '/echobot' }">
+      <div class="footer-beian">
+        <a :href="MIIT_URL" target="_blank" rel="noopener noreferrer">
+          {{ ICP_RECORD_NUMBER }}
+        </a>
+        <span class="footer-beian-sep" aria-hidden="true">·</span>
+        <a :href="PSB_QUERY_URL" target="_blank" rel="noopener noreferrer">
+          {{ PSB_RECORD_NUMBER }}
+        </a>
+      </div>
     </footer>
   </div>
 </template>
@@ -145,6 +192,32 @@ watch(
   background-position: center;
   background-attachment: fixed;
   background-repeat: no-repeat;
+}
+
+/* Echobot：整页一屏，避免 body 上下滚动；主内容区在中间自适应高度 */
+.app-container--echobot {
+  height: 100vh;
+  max-height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.router-outlet {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.router-outlet--echobot {
+  min-height: 0;
+  overflow: hidden;
+}
+
+:global(html.echobot-route),
+:global(html.echobot-route body),
+:global(html.echobot-route #app) {
+  height: 100%;
+  overflow: hidden;
 }
 
 .loading-container {
@@ -192,6 +265,20 @@ watch(
   font-size: 0.95rem;
 }
 
+.footer-beian {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.65rem;
+}
+
+.footer-beian-sep {
+  opacity: 0.55;
+  user-select: none;
+}
+
 .site-footer {
   position: relative;
   margin-top: auto;
@@ -215,6 +302,17 @@ watch(
   background-size: 145px 80px, 180px 95px, 210px 105px;
   background-position: 0 0, 40px 28px, 90px 18px;
   opacity: 0.45;
+}
+
+/* 与 EchobotView 主背景同一套渐变，避免底栏偏艳蓝 */
+.site-footer--echobot {
+  /* background-color: transparent; */
+  background-image: #cfdcf5;
+  color: #5a7394;
+}
+
+.site-footer--echobot::before {
+  opacity: 0.32;
 }
 
 .site-footer a {
@@ -243,10 +341,81 @@ watch(
   transform: translateY(-1px);
 }
 
+/* 关闭 waifu.css 的 bottom/transform 过渡，避免离开 Echobot 时缩回右下角的动画 */
 :global(#waifu) {
   right: 24px !important;
   left: auto !important;
   top: auto !important;
   bottom: 0 !important;
+  transition: none !important;
+}
+
+/* AI 助手页：左侧居中放大，隐藏头顶气泡与开关 */
+:global(html.echobot-route #waifu-tips) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* bottom 贴备案栏上沿；flex 将 canvas 贴容器底部，避免画布上方留白、脚下一大块空 */
+/* transition:none 抵消 waifu.css 的 bottom 3s 入场 */
+:global(html.echobot-route #waifu) {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  right: auto !important;
+  left: calc(50vw - 200px) !important;
+  bottom: calc(5rem + 4px) !important;
+  transform: translateX(-50%) scale(1.78) !important;
+  transform-origin: bottom center !important;
+  z-index: 20 !important;
+  max-height: calc(100vh - 5rem - 56px) !important;
+  width: auto !important;
+  margin-bottom: 0 !important;
+  transition: none !important;
+  overflow: hidden !important;
+  pointer-events: auto !important;
+}
+
+:global(html.echobot-route #waifu #live2d) {
+  display: block !important;
+  flex-shrink: 0 !important;
+}
+
+:global(html.echobot-route #waifu:hover) {
+  transform: translateX(-50%) scale(1.78) !important;
+}
+
+@media (max-width: 900px) {
+  :global(html.echobot-route #waifu) {
+    left: 50% !important;
+    transform: translateX(-50%) scale(1.52) !important;
+    bottom: calc(5rem + 2px) !important;
+    max-height: calc(100vh - 5rem - 100px) !important;
+  }
+
+  :global(html.echobot-route #waifu:hover) {
+    transform: translateX(-50%) scale(1.52) !important;
+  }
+}
+
+:global(html.echobot-route #waifu-toggle) {
+  display: none !important;
+}
+
+:global(html.echobot-streaming #waifu) {
+  animation: waifuThinking 1.15s ease-in-out infinite;
+}
+
+@keyframes waifuThinking {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.12) drop-shadow(0 0 14px rgba(95, 127, 178, 0.45));
+  }
 }
 </style>

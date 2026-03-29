@@ -5,6 +5,15 @@ const instance = axios.create({ baseURL })
 
 instance.interceptors.request.use(
   (config) => {
+    if (typeof localStorage !== 'undefined') {
+      let id = localStorage.getItem('ro_ai_client_id')
+      if (!id) {
+        id = crypto.randomUUID()
+        localStorage.setItem('ro_ai_client_id', id)
+      }
+      config.headers = config.headers ?? {}
+      ;(config.headers as Record<string, string>)['X-Client-Id'] = id
+    }
     return config
   },
   (err) => {

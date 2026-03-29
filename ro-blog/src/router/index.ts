@@ -44,6 +44,14 @@ const router = createRouter({
       }
     },
     {
+      path: '/echobot',
+      name: 'echobot',
+      component: () => import('../views/EchobotView.vue'),
+      meta: {
+        title: 'AI 助手 - RO-BLOG'
+      }
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'notFound',
       component: () => import('../views/NotFound.vue'),
